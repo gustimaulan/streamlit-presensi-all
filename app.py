@@ -4,6 +4,11 @@ import pandas as pd
 from datetime import datetime
 import altair as alt
 
+st.set_page_config(
+    page_title="Monthly Recap",
+    layout="wide"
+)
+
 st.title("Monthly Recap")
 
 @st.cache_data
