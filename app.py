@@ -9,11 +9,11 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("Monthly Recap")
+st.title("Sigmath Recap")
 
 @st.cache_data
 def load_data():
-    conn = st.connection("gsheets", type=GSheetsConnection)
+    conn = st.connection("gsheets", type=GSheetsConnection, ttl=0)
     return conn.read(worksheet="Presensi", usecols=list(range(5)))
 
 df = load_data()
@@ -34,11 +34,11 @@ current_year = datetime.now().year
 current_month = datetime.now().month
 
 # Create two columns for year and month selection
-col1, col2 = st.columns(2)
+col1, col2 = st.sidebar.columns(2)
 
 with col1:
     # Year selection
-    year = st.selectbox(
+    year = st.sidebar.selectbox(
         "Select Year",
         list(df["Year"].unique()),
         index=list(df["Year"].unique()).index(current_year)
@@ -46,7 +46,7 @@ with col1:
 
 with col2:
     # Month selection
-    month = st.selectbox(
+    month = st.sidebar.selectbox(
         "Select Month",
         list(range(1, 13)),
         index=list(range(1, 13)).index(current_month)
@@ -60,7 +60,7 @@ filtered_df = df[
 
 # Create a sidebar filter for selecting "Nama Tentor"
 tutors = sorted(filtered_df["Nama Tentor"].unique())  # Sort the list of tutors in ascending order based on filtered data
-selected_tutor = st.selectbox(
+selected_tutor = st.sidebar.selectbox(
     "Select Tutor",
     options=["All"] + tutors,  # Add "All" option for no filtering
     index=0  # Default to "All"
@@ -87,8 +87,6 @@ total_entries = len(filtered_df)
 unique_tutors = filtered_df["Nama Tentor"].nunique()
 unique_students = filtered_df["Nama Siswa"].nunique()
 
-# Display the counts as scorecards
-st.markdown("### Scorecard")
 
 # Create three columns for scorecards
 col1, col2, col3 = st.columns(3)
@@ -98,6 +96,7 @@ with col1:
     st.markdown(f"""
     <div style="
         padding: 10px;
+        border: 1px solid rgba(49, 51, 63, 0.1);
         margin-bottom: 20px;
         border-radius: 5px;
         text-align: left;
@@ -112,6 +111,7 @@ with col2:
     st.markdown(f"""
     <div style="
         padding: 10px;
+        border: 1px solid rgba(49, 51, 63, 0.1);
         margin-bottom: 20px;
         border-radius: 5px;
         text-align: left;
@@ -126,6 +126,7 @@ with col3:
     st.markdown(f"""
     <div style="
         padding: 10px;
+        border: 1px solid rgba(49, 51, 63, 0.1);
         margin-bottom: 20px;
         border-radius: 5px;
         text-align: left;
@@ -141,12 +142,13 @@ if filtered_df.empty:
     st.write("No data available for the selected filters.")
 else:
     filtered_df = filtered_df.reset_index(drop=True)
+    filtered_df = filtered_df[["Hari dan Tanggal Les", "Nama Tentor", "Nama Siswa", "Jam Kegiatan Les"]]
     # Drop the unnecessary columns and reset the index, starting from 1
     filtered_df = filtered_df.rename(columns={
         "Hari dan Tanggal Les": "Date",
         "Nama Tentor": "Tutor",
-        "Jam Kegiatan Les": "Time",
         "Nama Siswa": "Student",
+        "Jam Kegiatan Les": "Time",
     })
 
     # Set the index to start from 1
@@ -164,7 +166,8 @@ bar_chart = alt.Chart(date_counts_df).mark_bar().encode(
 text_labels = bar_chart.mark_text(
     align='center',  # Center the text horizontally
     baseline='middle',  # Center the text vertically
-    dy=-10  # Adjust the vertical position of the text
+    dy=-10,  # Adjust the vertical position of the text
+    color='gray'
 ).encode(
     text='Count:Q'  # Display the count as text
 )
@@ -211,7 +214,8 @@ bar_chart = alt.Chart(day_counts_df).mark_bar().encode(
 text_labels = bar_chart.mark_text(
     align='center',  # Center the text horizontally
     baseline='middle',  # Center the text vertically
-    dy=-10  # Adjust the vertical position of the text
+    dy=-10,  # Adjust the vertical position of the text
+    color='gray'   
 ).encode(
     text='Count:Q'  # Display the count as text
 )
