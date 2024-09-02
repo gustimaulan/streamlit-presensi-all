@@ -11,9 +11,9 @@ st.set_page_config(
 
 st.title("Sigmath Recap")
 
-@st.cache_data
+@st.cache_data(ttl=0)
 def load_data():
-    conn = st.connection("gsheets", type=GSheetsConnection, ttl=0)
+    conn = st.connection("gsheets", type=GSheetsConnection)
     return conn.read(worksheet="Presensi", usecols=list(range(5)))
 
 df = load_data()
